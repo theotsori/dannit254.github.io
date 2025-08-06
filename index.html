@@ -443,7 +443,6 @@
     </style>
 </head>
 <body>
-    <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-content">
             <div class="logo">Dannit</div>
@@ -457,7 +456,6 @@
         </div>
     </nav>
 
-    <!-- Hero Section -->
     <section id="home" class="hero">
         <div class="hero-bg"></div>
         <div class="hero-content">
@@ -468,7 +466,6 @@
         </div>
     </section>
 
-    <!-- Split Portfolio Section -->
     <section id="portfolio" class="split-section">
         <div class="split-left">
             <div class="split-content">
@@ -486,7 +483,6 @@
         </div>
     </section>
 
-    <!-- Services Section -->
     <section id="services" class="services">
         <h2 class="section-title fade-in">Services</h2>
         <div class="services-grid">
@@ -517,7 +513,6 @@
         </div>
     </section>
 
-    <!-- Behind the Lens Section -->
     <section id="about" class="behind-lens">
         <div class="behind-content">
             <h2 class="section-title fade-in">Behind the Lens</h2>
@@ -543,36 +538,34 @@
         </div>
     </section>
 
-    <!-- Contact Section -->
     <section id="contact" class="contact">
         <h2 class="section-title fade-in">Let's Create Together</h2>
         <p class="fade-in">Ready to capture your story? Get in touch and let's discuss your vision.</p>
-        <form class="contact-form fade-in">
+        <form id="whatsappForm" class="contact-form fade-in">
             <div class="form-row">
-                <input type="text" class="form-input" placeholder="Your Name" required>
-                <input type="email" class="form-input" placeholder="Your Email" required>
+                <input type="text" id="formName" class="form-input" placeholder="Your Name" required>
+                <input type="email" id="formEmail" class="form-input" placeholder="Your Email" required>
             </div>
             <div class="form-row">
-                <input type="tel" class="form-input" placeholder="Phone Number">
-                <select class="form-input" required>
+                <input type="tel" id="formPhone" class="form-input" placeholder="Phone Number">
+                <select id="formService" class="form-input" required>
                     <option value="">Select Service</option>
-                    <option value="studio">Studio Session</option>
-                    <option value="outdoor">Outdoor Portrait</option>
-                    <option value="event">Event Coverage</option>
-                    <option value="editing">Editing Services</option>
+                    <option value="Studio Session">Studio Session</option>
+                    <option value="Outdoor Portrait">Outdoor Portrait</option>
+                    <option value="Event Coverage">Event Coverage</option>
+                    <option value="Editing Services">Editing Services</option>
                 </select>
             </div>
-            <textarea class="form-input form-textarea" placeholder="Tell me about your project..." required></textarea>
-            <button type="submit" class="submit-btn">Send Message</button>
+            <textarea id="formMessage" class="form-input form-textarea" placeholder="Tell me about your project..." required></textarea>
+            <button type="submit" class="submit-btn">Send Message via WhatsApp</button>
         </form>
     </section>
 
-    <!-- Social Float -->
     <div class="social-float">
-        <a href="#" class="social-link" title="Instagram">
+        <a href="https://www.instagram.com/dannit_mediastudios?igsh=MXcxczZlMGdodDlneg==" class="social-link" title="Instagram">
             <i class="fab fa-instagram"></i>
         </a>
-        <a href="#" class="social-link" title="TikTok">
+        <a href="https://www.tiktok.com/@duncan_isagi?_t=ZM-8yexQWsVyRa&_r=1" class="social-link" title="TikTok">
             <i class="fab fa-tiktok"></i>
         </a>
         <a href="#" class="social-link" title="YouTube">
@@ -622,17 +615,48 @@
             }
         });
 
-        // Form submission
-        document.querySelector('.contact-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            alert('Thank you for your message! Duncan will get back to you soon.');
+        // *** MODIFIED FORM SUBMISSION SCRIPT ***
+        document.getElementById('whatsappForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevents the default form submission
+
+            // 1. SET YOUR WHATSAPP NUMBER HERE (including country code, no '+')
+            const ownerPhoneNumber = '254796442835'; 
+
+            // 2. Get data from form fields
+            const name = document.getElementById('formName').value;
+            const email = document.getElementById('formEmail').value;
+            const phone = document.getElementById('formPhone').value;
+            const service = document.getElementById('formService').value;
+            const message = document.getElementById('formMessage').value;
+
+            // 3. Create the WhatsApp message
+            const whatsappMessage = `*New Inquiry from ${name}*
+            
+*Service:* ${service}
+*Message:* ${message}
+            
+*Contact Details:*
+- *Email:* ${email}
+- *Phone:* ${phone}`;
+
+            // 4. Encode the message for a URL
+            const encodedMessage = encodeURIComponent(whatsappMessage);
+
+            // 5. Create the WhatsApp link
+            const whatsappUrl = `https://wa.me/${ownerPhoneNumber}?text=${encodedMessage}`;
+
+            // 6. Open the link in a new tab
+            window.open(whatsappUrl, '_blank');
         });
+
 
         // Parallax effect for hero section
         window.addEventListener('scroll', () => {
             const scrolled = window.pageYOffset;
             const hero = document.querySelector('.hero-bg');
-            hero.style.transform = `translateY(${scrolled * 0.5}px)`;
+            if (hero) { // Check if the element exists
+                 hero.style.transform = `translateY(${scrolled * 0.5}px)`;
+            }
         });
     </script>
 </body>
