@@ -137,8 +137,6 @@ Recommended free hosts:
 ---
 
 ## 🔒 Security Checklist Before Going Live
-- [ ] Change admin password from `dannit2024`
-- [ ] Set a strong `SECRET_KEY` environment variable
 - [ ] Enable HTTPS (SSL certificate)
 - [ ] Consider Cloudflare for CDN + DDoS protection
 
