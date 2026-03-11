@@ -19,7 +19,7 @@ Go to http://localhost:5000/admin/login
 
 **Default Credentials:**
 - Username: `admin`
-- Password: `dannit2024`
+- Password: `*******`
 
 ⚠️ **IMPORTANT:** Change the default password immediately after first login!
 
