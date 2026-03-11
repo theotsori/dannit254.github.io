@@ -1,0 +1,164 @@
+{% extends "admin/base.html" %}
+{% block title %}Upload Photos{% endblock %}
+{% block page_title %}Upload Photos{% endblock %}
+
+{% block content %}
+<div style="display:grid;grid-template-columns:1fr 380px;gap:1.5rem;align-items:start;">
+
+  <div class="panel">
+    <div class="panel-header"><span class="panel-title">Upload Images</span></div>
+    <div class="panel-body">
+      <form method="POST" enctype="multipart/form-data" id="uploadForm">
+
+        <div class="dropzone" id="dropzone">
+          <input type="file" name="photos" multiple accept="image/*" id="fileInput">
+          <i class="fas fa-cloud-upload-alt dropzone-icon"></i>
+          <p class="dropzone-text">Drag & drop photos here, or click to browse</p>
+          <p class="dropzone-sub">Supports: JPG, PNG, WEBP, GIF — Max 20MB per file</p>
+        </div>
+
+        <div class="preview-grid" id="previewGrid"></div>
+
+        <div style="height:1.5rem;"></div>
+        <div class="form-grid form-2col">
+          <div class="f-field">
+            <label>Category *</label>
+            <select name="category" id="catSelect" required>
+              {% for key, cat in categories.items() %}
+              <option value="{{ key }}">{{ cat.label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="f-field">
+            <label>Subcategory</label>
+            <select name="subcategory" id="subSelect">
+              <option value="">— Select subcategory —</option>
+            </select>
+          </div>
+        </div>
+        <div style="height:1rem;"></div>
+        <div class="form-grid">
+          <div class="f-field">
+            <label>Caption (applies to all uploads)</label>
+            <input type="text" name="caption" placeholder="e.g. Sarah & John's Wedding Day">
+          </div>
+          <div class="f-field">
+            <label>Description</label>
+            <textarea name="description" placeholder="Optional description..."></textarea>
+          </div>
+        </div>
+        <div style="height:1rem;"></div>
+        <div class="checkbox-field">
+          <input type="checkbox" name="featured" id="featuredCheck">
+          <label for="featuredCheck">Mark as featured (shows on homepage)</label>
+        </div>
+        <div style="height:1.5rem;"></div>
+        <button type="submit" class="btn btn-gold" id="submitBtn">
+          <i class="fas fa-upload"></i> <span>Upload Photos</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Help Panel -->
+  <div>
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Upload Guide</span></div>
+      <div class="panel-body">
+        <p style="font-size:0.78rem;color:var(--text-muted);line-height:1.7;margin-bottom:1rem;">
+          <strong style="color:var(--text);">Recommended sizes:</strong><br>
+          For best quality, upload images at least 2000px wide. Supported formats: JPG, PNG, WEBP.
+        </p>
+        <p style="font-size:0.78rem;color:var(--text-muted);line-height:1.7;margin-bottom:1rem;">
+          <strong style="color:var(--text);">Featured photos</strong> appear on the homepage gallery — pick your best 6–12 shots.
+        </p>
+        <p style="font-size:0.78rem;color:var(--text-muted);line-height:1.7;">
+          <strong style="color:var(--text);">Batch upload:</strong> Select multiple files at once. The same category, subcategory, and caption will be applied to all uploaded files.
+        </p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Categories</span></div>
+      <div class="panel-body">
+        {% for key, cat in categories.items() %}
+        <div style="margin-bottom:1.2rem;">
+          <span class="badge badge-{{ key }}" style="margin-bottom:0.5rem;display:block;">{{ cat.label }}</span>
+          <div style="display:flex;flex-wrap:wrap;gap:0.3rem;">
+            {% for sub in cat.subcategories %}
+            <span style="font-size:0.6rem;color:var(--text-dim);background:rgba(255,255,255,0.03);padding:0.2rem 0.5rem;border:1px solid rgba(255,255,255,0.05);">{{ sub }}</span>
+            {% endfor %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const CATEGORIES = {{ categories | tojson }};
+const catSelect = document.getElementById('catSelect');
+const subSelect = document.getElementById('subSelect');
+
+function updateSubcategories() {
+  const cat = catSelect.value;
+  subSelect.innerHTML = '<option value="">— Select subcategory —</option>';
+  if (CATEGORIES[cat]) {
+    CATEGORIES[cat].subcategories.forEach(sub => {
+      const opt = document.createElement('option');
+      opt.value = sub; opt.textContent = sub;
+      subSelect.appendChild(opt);
+    });
+  }
+}
+catSelect.addEventListener('change', updateSubcategories);
+updateSubcategories();
+
+// Dropzone preview
+const fileInput = document.getElementById('fileInput');
+const previewGrid = document.getElementById('previewGrid');
+const dropzone = document.getElementById('dropzone');
+
+fileInput.addEventListener('change', showPreviews);
+
+['dragover', 'dragenter'].forEach(e => {
+  dropzone.addEventListener(e, ev => { ev.preventDefault(); dropzone.classList.add('dragover'); });
+});
+['dragleave', 'drop'].forEach(e => {
+  dropzone.addEventListener(e, ev => { dropzone.classList.remove('dragover'); });
+});
+dropzone.addEventListener('drop', ev => {
+  ev.preventDefault();
+  fileInput.files = ev.dataTransfer.files;
+  showPreviews();
+});
+
+function showPreviews() {
+  previewGrid.innerHTML = '';
+  const files = Array.from(fileInput.files);
+  files.forEach(file => {
+    const div = document.createElement('div');
+    div.className = 'preview-item';
+    const img = document.createElement('img');
+    img.src = URL.createObjectURL(file);
+    div.appendChild(img);
+    previewGrid.appendChild(div);
+  });
+  const p = document.createElement('p');
+  p.style.cssText = 'font-size:0.72rem;color:var(--gold);margin-top:0.75rem;grid-column:1/-1;';
+  p.textContent = `${files.length} file${files.length !== 1 ? 's' : ''} selected`;
+  previewGrid.appendChild(p);
+}
+
+// Upload progress
+document.getElementById('uploadForm').addEventListener('submit', () => {
+  const btn = document.getElementById('submitBtn');
+  btn.querySelector('span').textContent = 'Uploading...';
+  btn.disabled = true;
+});
+</script>
+{% endblock %}

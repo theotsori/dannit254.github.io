@@ -1,0 +1,92 @@
+{% extends "admin/base.html" %}
+{% block title %}Enquiry #{{ booking.id }}{% endblock %}
+{% block page_title %}Enquiry Detail{% endblock %}
+
+{% block content %}
+<div style="max-width:800px;">
+
+  <!-- Back + Actions bar -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
+    <a href="/admin/bookings" class="btn btn-outline btn-sm"><i class="fas fa-arrow-left"></i> Back to All Enquiries</a>
+    <div style="display:flex;gap:0.75rem;">
+      <a href="mailto:{{ booking.email }}?subject=Re: {{ booking.service or 'Your Enquiry' }} — Dannit Media Studios"
+         class="btn btn-gold btn-sm"><i class="fas fa-reply"></i> Reply via Email</a>
+      {% if booking.phone %}
+      <a href="https://wa.me/{{ booking.phone | replace('+','') | replace(' ','') }}" target="_blank"
+         class="btn btn-outline btn-sm" style="color:#4ecdc4;border-color:rgba(78,205,196,0.3);">
+        <i class="fab fa-whatsapp"></i> WhatsApp
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Enquiry Header Card -->
+  <div class="panel">
+    <div class="panel-header" style="background:rgba(201,169,110,0.04);">
+      <div style="display:flex;align-items:center;gap:1rem;">
+        <div style="width:42px;height:42px;background:rgba(201,169,110,0.12);display:flex;align-items:center;justify-content:center;border:1px solid rgba(201,169,110,0.2);">
+          <i class="fas fa-user" style="color:var(--gold);font-size:0.9rem;"></i>
+        </div>
+        <div>
+          <div style="font-size:1rem;color:var(--white);font-weight:500;">{{ booking.name }}</div>
+          <div style="font-size:0.68rem;color:var(--gray);letter-spacing:0.1em;">Enquiry #{{ booking.id }}</div>
+        </div>
+      </div>
+      <span class="badge badge-studio" style="font-size:0.68rem;padding:0.35rem 0.9rem;">
+        {{ booking.service or 'General Enquiry' }}
+      </span>
+    </div>
+
+    <div class="panel-body">
+      <!-- Contact Details -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-bottom:2rem;padding-bottom:2rem;border-bottom:1px solid rgba(201,169,110,0.08);">
+        <div>
+          <div style="font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gray-2);margin-bottom:0.5rem;">Email Address</div>
+          <a href="mailto:{{ booking.email }}" style="font-size:0.88rem;color:var(--gold);text-decoration:none;word-break:break-all;">
+            <i class="fas fa-envelope" style="margin-right:0.4rem;font-size:0.75rem;"></i>{{ booking.email }}
+          </a>
+        </div>
+        <div>
+          <div style="font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gray-2);margin-bottom:0.5rem;">Phone Number</div>
+          {% if booking.phone %}
+          <a href="tel:{{ booking.phone }}" style="font-size:0.88rem;color:var(--white);text-decoration:none;">
+            <i class="fas fa-phone" style="margin-right:0.4rem;font-size:0.75rem;color:var(--gray-2);"></i>{{ booking.phone }}
+          </a>
+          {% else %}
+          <span style="font-size:0.88rem;color:var(--gray-2);">Not provided</span>
+          {% endif %}
+        </div>
+        <div>
+          <div style="font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gray-2);margin-bottom:0.5rem;">Received</div>
+          <div style="font-size:0.88rem;color:var(--white);">
+            <i class="fas fa-clock" style="margin-right:0.4rem;font-size:0.75rem;color:var(--gray-2);"></i>{{ booking.created_at[:16] }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Message -->
+      <div>
+        <div style="font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gray-2);margin-bottom:0.8rem;display:flex;align-items:center;gap:0.5rem;">
+          <i class="fas fa-comment-alt" style="color:var(--gold);"></i> Client Message
+        </div>
+        <div style="font-size:0.95rem;color:var(--gray);line-height:1.85;background:var(--black-4);padding:1.5rem 1.8rem;border:1px solid rgba(201,169,110,0.08);border-left:3px solid var(--gold);white-space:pre-wrap;font-family:'Jost',sans-serif;">{{ booking.message or 'No message was provided with this enquiry.' }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Danger Zone -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title" style="color:var(--error);">Danger Zone</span>
+    </div>
+    <div class="panel-body">
+      <p style="font-size:0.78rem;color:var(--gray);margin-bottom:1rem;">Permanently delete this enquiry. This action cannot be undone.</p>
+      <form method="POST" action="/admin/bookings/{{ booking.id }}/delete"
+            onsubmit="return confirm('Delete enquiry from {{ booking.name }}? This cannot be undone.')">
+        <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i> Delete Enquiry</button>
+      </form>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

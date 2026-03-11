@@ -1,0 +1,132 @@
+{% extends "admin/base.html" %}
+{% block title %}Settings{% endblock %}
+{% block page_title %}Site Settings{% endblock %}
+
+{% block extra_head %}
+<style>
+@media (max-width: 800px) {
+  .settings-grid { grid-template-columns: 1fr !important; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="settings-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:start;">
+
+  <!-- Site Info -->
+  <div class="panel">
+    <div class="panel-header"><span class="panel-title">Site Information</span></div>
+    <div class="panel-body">
+      <form method="POST" class="form-grid">
+        <div class="f-field">
+          <label>Site Name</label>
+          <input type="text" name="site_name" value="{{ settings.site_name }}">
+        </div>
+        <div class="f-field">
+          <label>Tagline</label>
+          <input type="text" name="tagline" value="{{ settings.tagline }}">
+        </div>
+        <div class="f-field">
+          <label>Hero Text</label>
+          <input type="text" name="hero_text" value="{{ settings.hero_text }}">
+        </div>
+        <div class="f-field">
+          <label>Location</label>
+          <input type="text" name="location" value="{{ settings.location }}">
+        </div>
+        <div class="form-grid form-2col">
+          <div class="f-field">
+            <label>Phone</label>
+            <input type="text" name="phone" value="{{ settings.phone }}">
+          </div>
+          <div class="f-field">
+            <label>WhatsApp (digits only)</label>
+            <input type="text" name="whatsapp" value="{{ settings.whatsapp }}" placeholder="254700000000">
+          </div>
+        </div>
+        <div class="f-field">
+          <label>Email</label>
+          <input type="email" name="email" value="{{ settings.email }}">
+        </div>
+
+        <div style="border-top:1px solid var(--border);padding-top:1.2rem;">
+          <p style="font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;">Social Media Links</p>
+        </div>
+        <div class="f-field">
+          <label><i class="fab fa-instagram" style="width:16px;color:var(--gold);"></i> Instagram URL</label>
+          <input type="text" name="instagram" value="{{ settings.instagram }}" placeholder="https://instagram.com/yourpage">
+        </div>
+        <div class="f-field">
+          <label><i class="fab fa-facebook-f" style="width:16px;color:var(--gold);"></i> Facebook URL</label>
+          <input type="text" name="facebook" value="{{ settings.get('facebook', '#') }}" placeholder="https://facebook.com/yourpage">
+        </div>
+        <div class="f-field">
+          <label><i class="fab fa-tiktok" style="width:16px;color:var(--gold);"></i> TikTok URL</label>
+          <input type="text" name="tiktok" value="{{ settings.tiktok }}" placeholder="https://tiktok.com/@yourpage">
+        </div>
+        <div class="f-field">
+          <label><i class="fab fa-youtube" style="width:16px;color:var(--gold);"></i> YouTube URL</label>
+          <input type="text" name="youtube" value="{{ settings.youtube }}" placeholder="https://youtube.com/@channel">
+        </div>
+        <button type="submit" class="btn btn-gold"><i class="fas fa-save"></i> Save Settings</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Right column -->
+  <div>
+    <!-- Change Password -->
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Change Password</span></div>
+      <div class="panel-body">
+        <form method="POST" action="/admin/change-password" class="form-grid">
+          <div class="f-field">
+            <label>Current Password</label>
+            <input type="password" name="current_password" required autocomplete="current-password">
+          </div>
+          <div class="f-field">
+            <label>New Password</label>
+            <input type="password" name="new_password" required minlength="8" autocomplete="new-password">
+          </div>
+          <button type="submit" class="btn btn-gold"><i class="fas fa-lock"></i> Update Password</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Categories shortcut -->
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Portfolio Categories</span></div>
+      <div class="panel-body">
+        <p style="font-size:0.78rem;color:var(--text-muted);line-height:1.7;margin-bottom:1.2rem;">
+          Add, remove, or update portfolio categories and their subcategories.
+        </p>
+        <a href="/admin/categories" class="btn btn-outline">
+          <i class="fas fa-tags"></i> Manage Categories
+        </a>
+      </div>
+    </div>
+
+    <!-- System Info -->
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">System Info</span></div>
+      <div class="panel-body" style="padding:0;">
+        <table style="width:100%;border-collapse:collapse;">
+          <tr>
+            <td style="padding:0.75rem 1.5rem;font-size:0.72rem;color:var(--text-muted);border-bottom:1px solid var(--border);">Admin URL</td>
+            <td style="padding:0.75rem 1.5rem;font-size:0.72rem;color:var(--text);border-bottom:1px solid var(--border);">/admin</td>
+          </tr>
+          <tr>
+            <td style="padding:0.75rem 1.5rem;font-size:0.72rem;color:var(--text-muted);border-bottom:1px solid var(--border);">Default Login</td>
+            <td style="padding:0.75rem 1.5rem;font-size:0.72rem;color:var(--text);border-bottom:1px solid var(--border);">admin / dannit2024</td>
+          </tr>
+          <tr>
+            <td style="padding:0.75rem 1.5rem;font-size:0.72rem;color:var(--error);">⚠ Action Required</td>
+            <td style="padding:0.75rem 1.5rem;font-size:0.72rem;color:var(--error);">Change default password before deploying!</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,131 @@
+{% extends "admin/base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- Stat Cards — total, one per category (dynamic), featured, bookings -->
+<div class="stat-cards">
+  <div class="stat-card">
+    <i class="fas fa-images icon"></i>
+    <span class="num">{{ stats.total }}</span>
+    <span class="label">Total Photos</span>
+  </div>
+  {% for key, cat in categories.items() %}
+  <div class="stat-card">
+    <i class="fas fa-folder icon"></i>
+    <span class="num">{{ stats.get(key, 0) }}</span>
+    <span class="label">{{ cat.label }}</span>
+  </div>
+  {% endfor %}
+  <div class="stat-card">
+    <i class="fas fa-star icon"></i>
+    <span class="num">{{ stats.featured }}</span>
+    <span class="label">Featured</span>
+  </div>
+  <div class="stat-card">
+    <i class="fas fa-envelope icon"></i>
+    <span class="num">{{ stats.bookings }}</span>
+    <span class="label">New Bookings</span>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+
+  <!-- Recent Photos -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">Recent Photos</span>
+      <a href="/admin/upload" class="btn btn-gold btn-sm"><i class="fas fa-plus"></i> Upload</a>
+    </div>
+    <div class="panel-body" style="padding:1rem;">
+      {% if recent_photos %}
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">
+        {% for photo in recent_photos %}
+        <a href="/admin/photos/{{ photo.id }}/edit"
+           style="display:block;aspect-ratio:1;background:var(--black-4);overflow:hidden;border:1px solid var(--border);">
+          <img src="{{ url_for('uploaded_file', filename=photo.filename) }}"
+               alt="{{ photo.caption or '' }}"
+               style="width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.35s;"
+               class="dash-thumb"
+               loading="lazy">
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div style="text-align:center;padding:2.5rem 1rem;color:var(--text-dim);">
+        <i class="fas fa-camera" style="font-size:2rem;margin-bottom:0.75rem;display:block;color:rgba(201,169,110,0.12);"></i>
+        No photos yet. <a href="/admin/upload" style="color:var(--gold);">Upload your first photo.</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Recent Bookings -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">Recent Bookings</span>
+      <a href="/admin/bookings" class="btn btn-outline btn-sm">View All</a>
+    </div>
+    <div class="panel-body" style="padding:0;">
+      {% if recent_bookings %}
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Service</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for b in recent_bookings %}
+          <tr style="cursor:pointer;" onclick="location.href='/admin/bookings/{{ b.id }}'">
+            <td style="color:var(--text);">{{ b.name }}</td>
+            <td>
+              {% if b.service %}
+              <span class="badge badge-studio">{{ b.service }}</span>
+              {% else %}—{% endif %}
+            </td>
+            <td style="font-size:0.7rem;white-space:nowrap;color:var(--text-dim);">{{ b.created_at[:10] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div style="text-align:center;padding:2.5rem 1rem;color:var(--text-dim);">
+        <i class="fas fa-inbox" style="font-size:2rem;margin-bottom:0.75rem;display:block;color:rgba(201,169,110,0.12);"></i>
+        No bookings yet.
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
+<!-- Quick Actions -->
+<div class="panel" style="margin-top:0;">
+  <div class="panel-header"><span class="panel-title">Quick Actions</span></div>
+  <div class="panel-body" style="display:flex;gap:0.75rem;flex-wrap:wrap;padding:1rem 1.5rem;">
+    <a href="/admin/upload"     class="btn btn-gold">   <i class="fas fa-cloud-upload-alt"></i> Upload Photos</a>
+    <a href="/admin/photos"     class="btn btn-outline"> <i class="fas fa-images"></i> Manage Photos</a>
+    <a href="/admin/bookings"   class="btn btn-outline"> <i class="fas fa-calendar"></i> View Bookings</a>
+    <a href="/admin/categories" class="btn btn-outline"> <i class="fas fa-tags"></i> Categories</a>
+    <a href="/admin/settings"   class="btn btn-outline"> <i class="fas fa-cog"></i> Settings</a>
+    <a href="/" target="_blank" class="btn btn-outline"> <i class="fas fa-external-link-alt"></i> View Site</a>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_head %}
+<style>
+/* CSS-only thumbnail hover — no inline JS needed */
+.dash-thumb:hover { transform: scale(1.06); }
+@media (max-width: 700px) {
+  /* Stack the two panels on narrow screens */
+  div[style*="grid-template-columns:1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}{{ cat_info.label }} — {{ settings.site_name }}{% endblock %}
+
+{% block extra_head %}
+<style>
+/* Gallery page — back link hover via CSS (no inline JS) */
+.back-link { transition: color var(--transition); }
+.back-link:hover { color: var(--gold) !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="padding-top:var(--nav-h)">
+
+  <!-- Page Header -->
+  <div style="padding:6rem 4rem 4rem;background:var(--black-2);border-bottom:1px solid rgba(201,169,110,0.1);">
+    <div class="container">
+      <a href="{{ url_for('portfolio') }}"
+         class="back-link"
+         style="font-family:var(--font-ui);font-size:0.7rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gray);text-decoration:none;display:inline-flex;align-items:center;gap:0.5rem;margin-bottom:2rem;">
+        <i class="fas fa-arrow-left"></i> Portfolio
+      </a>
+      <p class="section-label" style="margin-bottom:1rem;">Portfolio</p>
+      <h1 class="section-title" style="font-size:clamp(2.5rem,6vw,5rem)">{{ cat_info.label }}</h1>
+    </div>
+  </div>
+
+  <!-- Subcategory Filter -->
+  <div style="position:sticky;top:var(--nav-h);background:var(--black);border-bottom:1px solid rgba(201,169,110,0.1);z-index:100;">
+    <div class="container">
+      <div class="portfolio-tabs" style="border-bottom:none;">
+        <a href="{{ url_for('portfolio_category', category=category) }}"
+           class="portfolio-tab {% if not active_sub %}active{% endif %}"
+           style="text-decoration:none;">All</a>
+        {% for sub in cat_info.subcategories %}
+        <a href="{{ url_for('portfolio_category', category=category) }}?sub={{ sub }}"
+           class="portfolio-tab {% if active_sub == sub %}active{% endif %}"
+           style="text-decoration:none;">{{ sub }}</a>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Gallery -->
+  <section style="padding:5rem 4rem;background:var(--black);min-height:60vh;">
+    <div class="container">
+      {% if photos %}
+      <div class="gallery-masonry">
+        {% for photo in photos %}
+        <div class="gallery-item reveal"
+             data-src="{{ url_for('uploaded_file', filename=photo.filename) }}"
+             data-caption="{{ photo.caption or '' }}"
+             data-sub="{{ photo.subcategory or '' }}">
+          <img src="{{ url_for('uploaded_file', filename=photo.filename) }}"
+               alt="{{ photo.caption or 'Dannit Media' }}" loading="lazy">
+          <div class="gallery-item-overlay">
+            <div class="gallery-item-title">{{ photo.caption or 'Untitled' }}</div>
+            <div class="gallery-item-cat">{{ photo.subcategory or cat_info.label }}</div>
+          </div>
+          <div class="gallery-expand"><i class="fas fa-expand-alt"></i></div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div style="text-align:center;margin-top:4rem;padding-top:3rem;border-top:1px solid rgba(201,169,110,0.1);">
+        <p style="font-family:var(--font-body);font-size:1rem;color:var(--gray);margin-bottom:2rem;">
+          Love what you see? Let's create something like this for you.
+        </p>
+        <a href="{{ url_for('index') }}#contact" class="btn-primary"><span>Book a Session</span></a>
+      </div>
+
+      {% else %}
+      <div class="empty-gallery">
+        <i class="fas fa-camera-retro"></i>
+        <p>No photos in this category yet. Check back soon.</p>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+
+</div>
+{% endblock %}

@@ -1,0 +1,140 @@
+{% extends "admin/base.html" %}
+{% block title %}Bookings{% endblock %}
+{% block page_title %}Booking Enquiries{% endblock %}
+
+{% block content %}
+<div class="panel">
+  <div class="panel-header">
+    <span class="panel-title">All Enquiries</span>
+    <span style="font-size:0.68rem;color:var(--text-dim);">{{ bookings|length }} total</span>
+  </div>
+
+  {% if bookings %}
+  <table class="data-table" id="bookingsTable">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Service</th>
+        <th>Preview</th>
+        <th>Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for b in bookings %}
+      <tr style="cursor:pointer;" onclick="location.href='/admin/bookings/{{ b.id }}'">
+        <td style="color:var(--text-dim);font-size:0.75rem;">{{ b.id }}</td>
+        <td style="color:var(--text);font-weight:500;white-space:nowrap;">
+          {% if b.status == 'new' %}
+          <span style="display:inline-block;width:6px;height:6px;background:var(--gold);border-radius:50%;margin-right:0.5rem;vertical-align:middle;"></span>
+          {% endif %}
+          {{ b.name }}
+        </td>
+        <td>
+          <a href="mailto:{{ b.email }}" style="color:var(--gold);text-decoration:none;"
+             onclick="event.stopPropagation()">{{ b.email }}</a>
+        </td>
+        <td style="color:var(--text-muted);">{{ b.phone or '—' }}</td>
+        <td>
+          {% if b.service %}
+          <span class="badge badge-studio">{{ b.service }}</span>
+          {% else %}<span style="color:var(--text-dim);">—</span>{% endif %}
+        </td>
+        <td style="max-width:180px;font-size:0.75rem;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+          {{ (b.message or '—')[:55] }}{% if b.message and b.message|length > 55 %}…{% endif %}
+        </td>
+        <td style="font-size:0.7rem;white-space:nowrap;color:var(--text-dim);">{{ b.created_at[:16] }}</td>
+        <td onclick="event.stopPropagation()">
+          <div style="display:flex;gap:0.35rem;align-items:center;">
+            <a href="/admin/bookings/{{ b.id }}" class="btn btn-outline btn-sm" title="View detail">
+              <i class="fas fa-eye"></i>
+            </a>
+            <button onclick="toggleExpand({{ b.id }})" class="btn btn-outline btn-sm" title="Quick expand">
+              <i class="fas fa-chevron-down" id="chevron-{{ b.id }}"></i>
+            </button>
+            <form method="POST" action="/admin/bookings/{{ b.id }}/delete"
+                  onsubmit="return confirm('Delete this enquiry permanently?');"
+                  style="display:inline;">
+              <button type="submit" class="btn btn-danger btn-sm" title="Delete">
+                <i class="fas fa-trash"></i>
+              </button>
+            </form>
+          </div>
+        </td>
+      </tr>
+
+      <!-- Expanded detail row -->
+      <tr id="expand-{{ b.id }}" style="display:none;">
+        <td colspan="8" style="padding:0;">
+          <div style="background:var(--black-4);border-left:3px solid var(--gold);padding:1.75rem 2rem 1.75rem 2.25rem;">
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1.5rem;margin-bottom:1.25rem;">
+              <div>
+                <div style="font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-dim);margin-bottom:0.35rem;">Client</div>
+                <div style="font-size:0.9rem;color:var(--text);font-weight:500;">{{ b.name }}</div>
+              </div>
+              <div>
+                <div style="font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-dim);margin-bottom:0.35rem;">Email</div>
+                <a href="mailto:{{ b.email }}" style="font-size:0.88rem;color:var(--gold);text-decoration:none;word-break:break-all;">{{ b.email }}</a>
+              </div>
+              <div>
+                <div style="font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-dim);margin-bottom:0.35rem;">Phone</div>
+                <div style="font-size:0.88rem;color:var(--text);">{{ b.phone or '—' }}</div>
+              </div>
+              <div>
+                <div style="font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-dim);margin-bottom:0.35rem;">Date &amp; Time</div>
+                <div style="font-size:0.88rem;color:var(--text);">{{ b.created_at[:16] }}</div>
+              </div>
+            </div>
+            <div style="margin-bottom:1rem;">
+              <div style="font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-dim);margin-bottom:0.5rem;">Service</div>
+              <span class="badge badge-studio">{{ b.service or '—' }}</span>
+            </div>
+            <div>
+              <div style="font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--text-dim);margin-bottom:0.5rem;">Full Message</div>
+              <div style="font-size:0.88rem;color:var(--text-muted);line-height:1.75;background:var(--black-3);padding:1.1rem 1.4rem;border:1px solid rgba(201,169,110,0.08);white-space:pre-wrap;">{{ b.message or 'No message provided.' }}</div>
+            </div>
+            <div style="margin-top:1rem;display:flex;gap:0.6rem;flex-wrap:wrap;">
+              <a href="mailto:{{ b.email }}?subject=Re: {{ b.service or 'Your Enquiry' }} — Dannit Media"
+                 class="btn btn-gold btn-sm">
+                <i class="fas fa-reply"></i> Reply via Email
+              </a>
+              {% if b.phone %}
+              <a href="https://wa.me/{{ b.phone | replace('+','') | replace(' ','') }}"
+                 target="_blank" class="btn btn-outline btn-sm">
+                <i class="fab fa-whatsapp"></i> WhatsApp
+              </a>
+              {% endif %}
+              <a href="/admin/bookings/{{ b.id }}" class="btn btn-outline btn-sm">
+                <i class="fas fa-external-link-alt"></i> Full View
+              </a>
+            </div>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% else %}
+  <div style="text-align:center;padding:4rem 2rem;color:var(--text-dim);">
+    <i class="fas fa-inbox" style="font-size:2.5rem;display:block;margin-bottom:1rem;color:rgba(201,169,110,0.12);"></i>
+    No booking enquiries yet.
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleExpand(id) {
+  var row     = document.getElementById('expand-' + id);
+  var chevron = document.getElementById('chevron-' + id);
+  var isOpen  = row.style.display !== 'none';
+  row.style.display = isOpen ? 'none' : 'table-row';
+  chevron.className = isOpen ? 'fas fa-chevron-down' : 'fas fa-chevron-up';
+}
+</script>
+{% endblock %}

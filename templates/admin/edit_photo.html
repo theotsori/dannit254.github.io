@@ -1,0 +1,106 @@
+{% extends "admin/base.html" %}
+{% block title %}Edit Photo{% endblock %}
+{% block page_title %}Edit Photo{% endblock %}
+
+{% block content %}
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:start;">
+
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">Photo Details</span>
+      <a href="/admin/photos" class="btn btn-outline btn-sm">← Back</a>
+    </div>
+    <div class="panel-body">
+      <form method="POST" class="form-grid">
+        <div class="form-grid form-2col">
+          <div class="f-field">
+            <label>Category *</label>
+            <select name="category" id="catSelect" required>
+              {% for key, cat in categories.items() %}
+              <option value="{{ key }}" {% if photo.category == key %}selected{% endif %}>{{ cat.label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="f-field">
+            <label>Subcategory</label>
+            <select name="subcategory" id="subSelect">
+              <option value="">— None —</option>
+            </select>
+          </div>
+        </div>
+        <div class="f-field">
+          <label>Caption</label>
+          <input type="text" name="caption" value="{{ photo.caption or '' }}" placeholder="e.g. Sarah & John's Wedding">
+        </div>
+        <div class="f-field">
+          <label>Description</label>
+          <textarea name="description" placeholder="Optional extended description...">{{ photo.description or '' }}</textarea>
+        </div>
+        <div class="f-field">
+          <label>Sort Order (lower = first)</label>
+          <input type="number" name="sort_order" value="{{ photo.sort_order or 0 }}" min="0">
+        </div>
+        <div class="checkbox-field">
+          <input type="checkbox" name="featured" id="featCheck" {% if photo.featured %}checked{% endif %}>
+          <label for="featCheck">Featured (shows on homepage)</label>
+        </div>
+        <div style="display:flex;gap:1rem;align-items:center;">
+          <button type="submit" class="btn btn-gold"><i class="fas fa-save"></i> Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div>
+    <!-- Preview -->
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Preview</span></div>
+      <div class="panel-body" style="padding:0.75rem;">
+        <img src="{{ url_for('uploaded_file', filename=photo.filename) }}"
+             alt="" style="width:100%;height:auto;display:block;max-height:400px;object-fit:contain;background:var(--black);">
+        <div style="padding:0.75rem 0;font-size:0.7rem;color:var(--text-dim);line-height:1.7;">
+          Original filename: {{ photo.original_name }}<br>
+          Uploaded: {{ photo.created_at[:16] }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title" style="color:var(--error);">Danger Zone</span></div>
+      <div class="panel-body">
+        <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:1rem;">Permanently delete this photo. This cannot be undone.</p>
+        <form method="POST" action="/admin/photos/{{ photo.id }}/delete"
+              onsubmit="return confirm('Are you sure? This photo will be permanently deleted.')">
+          <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i> Delete Photo</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const CATEGORIES = {{ categories | tojson }};
+const catSelect = document.getElementById('catSelect');
+const subSelect = document.getElementById('subSelect');
+const currentSub = {{ photo.subcategory | tojson }};
+
+function updateSubs() {
+  const cat = catSelect.value;
+  subSelect.innerHTML = '<option value="">— None —</option>';
+  if (CATEGORIES[cat]) {
+    CATEGORIES[cat].subcategories.forEach(sub => {
+      const opt = document.createElement('option');
+      opt.value = sub; opt.textContent = sub;
+      if (sub === currentSub) opt.selected = true;
+      subSelect.appendChild(opt);
+    });
+  }
+}
+catSelect.addEventListener('change', updateSubs);
+updateSubs();
+</script>
+{% endblock %}

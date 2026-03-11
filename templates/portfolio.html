@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Portfolio — {{ settings.site_name }}{% endblock %}
+
+{% block extra_head %}
+<style>
+/* Portfolio page — category card image hover via CSS (no inline JS) */
+.portfolio-cat-card img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
+  display: block;
+}
+.portfolio-cat-card:hover img { transform: scale(1.06); }
+
+/* Responsive grid for category cards */
+@media (max-width: 900px) {
+  .portfolio-cat-grid { grid-template-columns: repeat(2, 1fr) !important; }
+}
+@media (max-width: 560px) {
+  .portfolio-cat-grid { grid-template-columns: 1fr !important; }
+  .portfolio-cat-card { aspect-ratio: 4/3 !important; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="padding-top:var(--nav-h)">
+
+  <!-- Page Header -->
+  <div style="padding:6rem 4rem 4rem;background:var(--black-2);border-bottom:1px solid rgba(201,169,110,0.1);">
+    <div class="container">
+      <p class="section-label" style="margin-bottom:1rem;">Our Work</p>
+      <h1 class="section-title" style="font-size:clamp(2.5rem,6vw,5rem)">The <em>Portfolio</em></h1>
+      <p class="section-body" style="margin-top:1rem;">
+        Explore our work across studio portraits, outdoor sessions, and events. Every image is a story waiting to be told.
+      </p>
+    </div>
+  </div>
+
+  <!-- Category Cards -->
+  <section style="padding:5rem 4rem;background:var(--black)">
+    <div class="container">
+      <div class="portfolio-cat-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;">
+        {% for key, cat in categories.items() %}
+        <a href="{{ url_for('portfolio_category', category=key) }}"
+           class="portfolio-cat-card"
+           style="text-decoration:none;display:block;position:relative;overflow:hidden;aspect-ratio:3/4;background:var(--black-3);">
+          {% set photos = photos_by_cat.get(key, []) %}
+          {% if photos %}
+          <img src="{{ url_for('uploaded_file', filename=photos[0].filename) }}"
+               alt="{{ cat.label }}">
+          {% else %}
+          <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--black-3),var(--black-4));">
+            <i class="fas fa-camera" style="font-size:3rem;color:rgba(201,169,110,0.15)"></i>
+          </div>
+          {% endif %}
+          <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(6,6,6,0.92) 0%,transparent 50%);">
+          </div>
+          <div style="position:absolute;bottom:0;left:0;right:0;padding:2.5rem;">
+            <p style="font-family:var(--font-ui);font-size:0.6rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:0.5rem;">
+              0{{ loop.index }} / {{ photos_by_cat.get(key, []) | length }} Photos
+            </p>
+            <h2 style="font-family:var(--font-display);font-size:1.6rem;color:var(--white);margin-bottom:1rem;letter-spacing:0.04em;">{{ cat.label }}</h2>
+            <div style="display:flex;flex-wrap:wrap;gap:0.5rem;">
+              {% for sub in cat.subcategories %}
+              <span style="font-family:var(--font-ui);font-size:0.55rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(255,255,255,0.5);background:rgba(255,255,255,0.06);padding:0.3rem 0.7rem;border:1px solid rgba(255,255,255,0.1);">{{ sub }}</span>
+              {% endfor %}
+            </div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <!-- All Photos Preview -->
+  {% set all_photos = [] %}
+  {% for key, photos in photos_by_cat.items() %}{% for p in photos %}{% if all_photos.append(p) %}{% endif %}{% endfor %}{% endfor %}
+
+  {% if all_photos %}
+  <section style="padding:5rem 4rem 6rem;background:var(--black);">
+    <div class="container">
+      <p class="section-label" style="margin-bottom:2rem;padding-top:2rem;border-top:1px solid rgba(201,169,110,0.1);">All Work</p>
+      <div class="gallery-masonry">
+        {% for photo in all_photos %}
+        <div class="gallery-item reveal"
+             data-src="{{ url_for('uploaded_file', filename=photo.filename) }}"
+             data-caption="{{ photo.caption or '' }}"
+             data-sub="{{ photo.subcategory or photo.category }}">
+          <img src="{{ url_for('uploaded_file', filename=photo.filename) }}"
+               alt="{{ photo.caption or 'Dannit Media' }}" loading="lazy">
+          <div class="gallery-item-overlay">
+            <div class="gallery-item-title">{{ photo.caption or 'Untitled' }}</div>
+            <div class="gallery-item-cat">{{ photo.subcategory or photo.category }}</div>
+          </div>
+          <div class="gallery-expand"><i class="fas fa-expand-alt"></i></div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  {% endif %}
+
+</div>
+{% endblock %}

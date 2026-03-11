@@ -1,0 +1,92 @@
+{% extends "admin/base.html" %}
+{% block title %}Photos{% endblock %}
+{% block page_title %}Photo Library{% endblock %}
+
+{% block content %}
+<!-- Filter bar -->
+<div style="display:flex;gap:0.6rem;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;">
+  <a href="/admin/photos"
+     class="btn btn-sm {% if not active_cat %}btn-gold{% else %}btn-outline{% endif %}">
+    All{% if not active_cat %} ({{ photos|length }}){% endif %}
+  </a>
+  {% for key, cat in categories.items() %}
+  <a href="/admin/photos?category={{ key }}"
+     class="btn btn-sm {% if active_cat == key %}btn-gold{% else %}btn-outline{% endif %}">
+    {{ cat.label }}{% if active_cat == key %} ({{ photos|length }}){% endif %}
+  </a>
+  {% endfor %}
+  <div style="margin-left:auto;">
+    <a href="/admin/upload" class="btn btn-gold btn-sm"><i class="fas fa-plus"></i> Upload</a>
+  </div>
+</div>
+
+{% if photos %}
+<div class="photo-grid" id="photoGrid">
+  {% for photo in photos %}
+  <div class="photo-card" id="card-{{ photo.id }}">
+    <img src="{{ url_for('uploaded_file', filename=photo.filename) }}"
+         alt="{{ photo.caption or '' }}" loading="lazy">
+    {% if photo.featured %}
+    <div class="featured-badge">★ Featured</div>
+    {% endif %}
+    <div class="photo-card-overlay">
+      <a href="/admin/photos/{{ photo.id }}/edit" class="btn btn-gold btn-sm">
+        <i class="fas fa-edit"></i> Edit
+      </a>
+      <button onclick="toggleFeatured({{ photo.id }}, this)"
+              class="btn btn-outline btn-sm"
+              data-featured="{{ photo.featured }}">
+        <i class="fas fa-star"></i> {{ 'Unfeature' if photo.featured else 'Feature' }}
+      </button>
+      <form method="POST" action="/admin/photos/{{ photo.id }}/delete"
+            onsubmit="return confirm('Delete this photo permanently?');">
+        <button type="submit" class="btn btn-danger btn-sm">
+          <i class="fas fa-trash"></i> Delete
+        </button>
+      </form>
+    </div>
+    <div class="photo-card-info">
+      <span class="badge badge-{{ photo.category }}">{{ photo.category }}</span>
+      {% if photo.subcategory %}· {{ photo.subcategory[:20] }}{% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+<p style="font-size:0.7rem;color:var(--text-dim);margin-top:1.25rem;">
+  Showing {{ photos|length }} photo{{ 's' if photos|length != 1 else '' }}
+</p>
+
+{% else %}
+<div style="text-align:center;padding:5rem 2rem;color:var(--text-dim);">
+  <i class="fas fa-images" style="font-size:3rem;margin-bottom:1rem;display:block;color:rgba(201,169,110,0.12);"></i>
+  <p style="margin-bottom:1.5rem;font-size:0.82rem;">No photos in this category yet.</p>
+  <a href="/admin/upload" class="btn btn-gold"><i class="fas fa-upload"></i> Upload Photos</a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+async function toggleFeatured(id, btn) {
+  var res  = await fetch('/admin/photos/' + id + '/toggle-featured', { method: 'POST' });
+  var data = await res.json();
+  if (data.success) {
+    var card       = document.getElementById('card-' + id);
+    var badge      = card.querySelector('.featured-badge');
+    var isFeatured = btn.dataset.featured === '1';
+    if (isFeatured) {
+      if (badge) badge.remove();
+      btn.innerHTML = '<i class="fas fa-star"></i> Feature';
+      btn.dataset.featured = '0';
+    } else {
+      var b = document.createElement('div');
+      b.className = 'featured-badge';
+      b.textContent = '★ Featured';
+      card.appendChild(b);
+      btn.innerHTML = '<i class="fas fa-star"></i> Unfeature';
+      btn.dataset.featured = '1';
+    }
+  }
+}
+</script>
+{% endblock %}

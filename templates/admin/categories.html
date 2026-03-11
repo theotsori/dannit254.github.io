@@ -1,0 +1,208 @@
+{% extends "admin/base.html" %}
+{% block title %}Categories{% endblock %}
+{% block page_title %}Manage Categories{% endblock %}
+
+{% block extra_head %}
+<style>
+.cat-panel-header {
+  padding: 0.9rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.cat-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.cat-key-tag {
+  font-family: var(--font-ui);
+  font-size: 0.58rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  background: rgba(201,169,110,0.08);
+  border: 1px solid rgba(201,169,110,0.2);
+  color: var(--gold);
+  padding: 0.22rem 0.6rem;
+}
+.cat-count {
+  font-size: 0.68rem;
+  color: var(--text-dim);
+}
+.cat-label {
+  font-size: 0.68rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 500;
+}
+.sub-chips-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+.empty-subs {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  font-style: italic;
+  margin-bottom: 1rem;
+}
+.section-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1.5rem 0;
+}
+.add-cat-hint {
+  font-size: 0.62rem;
+  color: var(--text-dim);
+  line-height: 1.6;
+  margin-bottom: 1.2rem;
+  padding: 0.8rem 1rem;
+  background: rgba(201,169,110,0.04);
+  border-left: 2px solid rgba(201,169,110,0.25);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="display:grid;grid-template-columns:1fr 340px;gap:1.5rem;align-items:start;">
+
+  <!-- ── Left column: existing categories ── -->
+  <div>
+    {% if categories %}
+      {% for key, cat in categories.items() %}
+      <div class="panel">
+        <div class="cat-panel-header">
+          <div class="cat-meta">
+            <span class="cat-key-tag">{{ key }}</span>
+            <span class="cat-label">{{ cat.label }}</span>
+            <span class="cat-count">
+              {{ cat_counts.get(key, 0) }} photo{{ 's' if cat_counts.get(key, 0) != 1 else '' }}
+            </span>
+          </div>
+          <form method="POST" action="/admin/categories/{{ key }}/delete"
+                onsubmit="return confirm('Permanently delete the category \u0022{{ cat.label }}\u0022 and all its subcategories?\n\nThis cannot be undone.');">
+            <button type="submit" class="btn btn-danger btn-sm"
+                    {% if cat_counts.get(key, 0) > 0 %}
+                    disabled
+                    title="Cannot delete: {{ cat_counts.get(key) }} photo(s) are assigned here. Reassign them first."
+                    {% else %}
+                    title="Delete this category"
+                    {% endif %}>
+              <i class="fas fa-trash"></i> Delete
+            </button>
+          </form>
+        </div>
+
+        <div class="panel-body">
+          <p style="font-size:0.6rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-dim);margin-bottom:0.9rem;">
+            Subcategories
+          </p>
+
+          {% if cat.subcategories %}
+          <div class="sub-chips-row">
+            {% for sub in cat.subcategories %}
+            <form method="POST" action="/admin/categories/{{ key }}/delete-sub" style="display:inline;">
+              <input type="hidden" name="name" value="{{ sub }}">
+              <button type="submit" class="sub-chip"
+                      title="Remove &quot;{{ sub }}&quot;"
+                      onclick="return confirm('Remove subcategory \u0022{{ sub }}\u0022?');">
+                {{ sub }}&nbsp;<i class="fas fa-times"></i>
+              </button>
+            </form>
+            {% endfor %}
+          </div>
+          {% else %}
+          <p class="empty-subs">No subcategories yet — add one below.</p>
+          {% endif %}
+
+          <!-- Add subcategory inline form -->
+          <form method="POST" action="/admin/categories/{{ key }}/add-sub" class="inline-add">
+            <input type="text" name="name" class="f-field-inline"
+                   placeholder="New subcategory name…" required autocomplete="off">
+            <button type="submit" class="btn btn-gold btn-sm">
+              <i class="fas fa-plus"></i> Add
+            </button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+
+    {% else %}
+    <div class="panel">
+      <div class="panel-body" style="text-align:center;padding:4rem 2rem;">
+        <i class="fas fa-folder-open" style="font-size:2.5rem;margin-bottom:1rem;display:block;color:rgba(201,169,110,0.12);"></i>
+        <p style="font-size:0.82rem;color:var(--text-dim);margin-bottom:1.5rem;">No categories yet.</p>
+        <p style="font-size:0.72rem;color:var(--text-dim);">Use the form on the right to add your first category.</p>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- ── Right column: add category ── -->
+  <div class="panel" style="position:sticky;top:calc(56px + 1.5rem);">
+    <div class="panel-header">
+      <span class="panel-title">Add New Category</span>
+    </div>
+    <div class="panel-body">
+      <p class="add-cat-hint">
+        Categories group your portfolio (e.g. <em>Newborn Photography</em>).
+        Subcategories let you filter within them (e.g. <em>Hospital Shoots</em>).
+      </p>
+      <form method="POST" action="/admin/categories/add" class="form-grid">
+        <div class="f-field">
+          <label>Category Label *</label>
+          <input type="text" name="label" id="catLabel"
+                 placeholder="e.g. Newborn Photography" required autocomplete="off">
+        </div>
+        <div class="f-field">
+          <label>URL Key *</label>
+          <input type="text" name="key" id="catKey"
+                 placeholder="e.g. newborn" required autocomplete="off"
+                 pattern="[a-z0-9_]+"
+                 title="Lowercase letters, numbers, and underscores only">
+          <span class="hint">Lowercase only. Used in page URLs and folder names.</span>
+        </div>
+        <button type="submit" class="btn btn-gold" style="margin-top:0.25rem;">
+          <i class="fas fa-plus"></i> Add Category
+        </button>
+      </form>
+
+      <hr class="section-divider">
+
+      <div style="font-size:0.68rem;color:var(--text-dim);line-height:1.7;">
+        <p style="margin-bottom:0.5rem;">
+          <i class="fas fa-info-circle" style="color:var(--gold);margin-right:0.3rem;"></i>
+          <strong style="color:var(--text-muted);">Tip:</strong> Delete is only allowed when a category has
+          <em>zero</em> photos. Reassign or remove the photos first.
+        </p>
+        <p>
+          <i class="fas fa-info-circle" style="color:var(--gold);margin-right:0.3rem;"></i>
+          Click the <span style="color:#ff9494;">✕</span> on any subcategory chip to remove it.
+          Existing photos retain their subcategory label but it will no longer appear in filters.
+        </p>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-generate the URL key from the label as the user types
+document.getElementById('catLabel').addEventListener('input', function() {
+  var key = this.value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+  document.getElementById('catKey').value = key;
+});
+</script>
+{% endblock %}

@@ -1,0 +1,364 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="hero" id="home">
+  <!-- Layered background elements -->
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-grid"></div>
+
+  <!-- Decorative left accent line -->
+  <div class="hero-accent"></div>
+
+  <div class="hero-left">
+    <p class="hero-eyebrow">Nairobi, Kenya</p>
+    <h1 class="hero-title">
+      Visual<br>
+      <em>Storytelling</em><br>
+      Refined
+    </h1>
+    <p class="hero-sub">
+      Luxury photography and videography capturing life's most precious moments, from intimate portraits to grand celebrations.
+    </p>
+    <div class="hero-actions">
+      <a href="{{ url_for('portfolio') }}" class="btn-primary"><span>View Portfolio</span></a>
+      <a href="#contact" class="btn-ghost">Book a Session <i class="fas fa-arrow-right"></i></a>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    {% if featured %}
+    <div class="hero-images">
+      {% for photo in featured[:5] %}
+      <div class="hero-img-slot">
+        <img src="{{ url_for('uploaded_file', filename=photo.filename) }}"
+             alt="{{ photo.caption or 'Dannit Media' }}" loading="lazy">
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="hero-right-fallback">
+      <i class="fas fa-camera-retro"></i>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Scroll indicator — direct child of .hero, never inside .hero-left
+       so it cannot overlap the CTA buttons -->
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    <span class="scroll-text">Scroll</span>
+  </div>
+
+</section>
+
+<!-- ═══════════════ PORTFOLIO PREVIEW ═══════════════ -->
+<section class="section portfolio-preview" id="portfolio">
+  <div class="container">
+    <div class="reveal">
+      <p class="section-label">Our Work</p>
+      <h2 class="section-title">A Glimpse into<br><em>Our Portfolio</em></h2>
+    </div>
+
+    <div class="portfolio-tabs reveal" id="portfolioTabs">
+      <button class="portfolio-tab active" data-cat="all">All Work</button>
+      {% for key, cat in categories.items() %}
+      <button class="portfolio-tab" data-cat="{{ key }}">{{ cat.label }}</button>
+      {% endfor %}
+    </div>
+
+    {% if featured %}
+    <div class="gallery-masonry reveal" id="homeGallery">
+      {% for photo in featured %}
+      <div class="gallery-item reveal"
+           data-src="{{ url_for('uploaded_file', filename=photo.filename) }}"
+           data-caption="{{ photo.caption or '' }}"
+           data-sub="{{ photo.subcategory or '' }}"
+           data-cat="{{ photo.category }}">
+        <img src="{{ url_for('uploaded_file', filename=photo.filename) }}"
+             alt="{{ photo.caption or 'Dannit Media' }}" loading="lazy">
+        <div class="gallery-item-overlay">
+          <div class="gallery-item-title">{{ photo.caption or 'Untitled' }}</div>
+          <div class="gallery-item-cat">{{ photo.subcategory or photo.category }}</div>
+        </div>
+        <div class="gallery-expand"><i class="fas fa-expand-alt"></i></div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="gallery-grid">
+      <div class="empty-gallery reveal">
+        <i class="fas fa-camera"></i>
+        <p>Portfolio coming soon. Gallery will display here once photos are uploaded via the admin panel.</p>
+      </div>
+    </div>
+    {% endif %}
+
+    <div style="text-align:center; margin-top:3rem;" class="reveal">
+      <a href="{{ url_for('portfolio') }}" class="btn-primary"><span>View Full Portfolio</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ ABOUT STRIP ═══════════════ -->
+<section class="about-strip" id="about">
+  <div class="about-inner">
+    <div class="about-left">
+      <p class="section-label reveal">Behind the Lens</p>
+      <h2 class="section-title reveal">Capturing <em>Kenya's</em><br>Finest Moments</h2>
+      <p class="section-body reveal" style="margin-top:1.5rem;">
+        Based in the vibrant city of Nairobi, I craft visual stories with cinematic precision and artistic soul.
+        Every session — whether an intimate portrait or a grand wedding — is approached with the same passion and meticulous attention to detail.
+      </p>
+      <div class="about-stats">
+        <div class="reveal">
+          <span class="stat-num">500+</span>
+          <span class="stat-label">Sessions Completed</span>
+        </div>
+        <div class="reveal">
+          <span class="stat-num">8+</span>
+          <span class="stat-label">Years Experience</span>
+        </div>
+        <div class="reveal">
+          <span class="stat-num">100%</span>
+          <span class="stat-label">Client Satisfaction</span>
+        </div>
+      </div>
+    </div>
+    <div class="about-right">
+      {% if featured %}
+      <img src="{{ url_for('uploaded_file', filename=featured[0].filename) }}" alt="Behind the lens" loading="lazy">
+      {% else %}
+      <div style="width:100%;height:100%;background:linear-gradient(135deg,var(--black-3),var(--black-4));display:flex;align-items:center;justify-content:center;">
+        <i class="fas fa-camera" style="font-size:4rem;color:var(--gold-dim)"></i>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ SERVICES ═══════════════ -->
+<section class="section" id="services">
+  <div class="container">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:end;margin-bottom:4rem;">
+      <div>
+        <p class="section-label reveal">What We Offer</p>
+        <h2 class="section-title reveal">Services Built for<br><em>Every Occasion</em></h2>
+      </div>
+      <div>
+        <p class="section-body reveal">From intimate birthday shoots to grand wedding productions — every service is delivered with luxury-grade quality and care.</p>
+      </div>
+    </div>
+
+    <div class="services-grid">
+      <div class="service-item reveal">
+        <div class="service-num">01</div>
+        <div class="service-icon"><i class="fas fa-camera"></i></div>
+        <div class="service-name">Studio Portraits</div>
+        <p class="service-desc">Controlled lighting, premium backdrops, and artistic vision. Perfect for birthdays, couples, families, graduations, and more.</p>
+      </div>
+      <div class="service-item reveal">
+        <div class="service-num">02</div>
+        <div class="service-icon"><i class="fas fa-mountain"></i></div>
+        <div class="service-name">Outdoor Portraits</div>
+        <p class="service-desc">Natural light in Kenya's breathtaking landscapes. Engagement shoots, nature portraits, and urban storytelling.</p>
+      </div>
+      <div class="service-item reveal">
+        <div class="service-num">03</div>
+        <div class="service-icon"><i class="fas fa-ring"></i></div>
+        <div class="service-name">Weddings &amp; Events</div>
+        <p class="service-desc">Comprehensive coverage for your most important day. Weddings, pre-weddings, corporate events, and team building experiences.</p>
+      </div>
+      <div class="service-item reveal">
+        <div class="service-num">04</div>
+        <div class="service-icon"><i class="fas fa-film"></i></div>
+        <div class="service-name">Videography</div>
+        <p class="service-desc">Cinematic video production and professional editing that transforms your moments into timeless visual narratives.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ PORTFOLIO CATEGORIES ═══════════════ -->
+<section class="section-sm" style="background:var(--black-2);">
+  <div class="container">
+    <div class="cat-grid-3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:rgba(201,169,110,0.08);">
+      {% for key, cat in categories.items() %}
+      <a href="{{ url_for('portfolio_category', category=key) }}" class="cat-link">
+        <p style="font-family:var(--font-ui);font-size:0.65rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;">
+          0{{ loop.index }}
+        </p>
+        <h3 style="font-family:var(--font-display);font-size:1.4rem;color:var(--white);margin-bottom:1rem;letter-spacing:0.04em;">{{ cat.label }}</h3>
+        <p style="font-family:var(--font-body);font-size:0.95rem;color:var(--gray);line-height:1.7;margin-bottom:2rem;">
+          {{ cat.subcategories | join(', ') }}
+        </p>
+        <span style="font-family:var(--font-ui);font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:0.5rem;">
+          Browse Gallery <i class="fas fa-arrow-right" style="font-size:0.6rem;"></i>
+        </span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ TESTIMONIALS ═══════════════ -->
+<section class="section testimonials">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:1rem;">
+      <p class="section-label reveal" style="justify-content:center;">Client Stories</p>
+      <h2 class="section-title reveal" style="text-align:center;">Words from<br><em>Our Clients</em></h2>
+    </div>
+    <div class="testimonials-grid">
+      <div class="testimonial-item reveal">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-quote">"Duncan's work is absolutely phenomenal. He captured our wedding day perfectly and the photos are breathtakingly stunning. Every detail was preserved beautifully."</p>
+        <div class="testimonial-author">Sarah &amp; Michael — Wedding</div>
+      </div>
+      <div class="testimonial-item reveal">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-quote">"Professional, creative, and incredibly talented. Duncan brought our brand vision to life so beautifully. The corporate event coverage exceeded all our expectations."</p>
+        <div class="testimonial-author">Amara Boutique — Corporate</div>
+      </div>
+      <div class="testimonial-item reveal">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-quote">"The outdoor portrait session was an experience in itself. Duncan knows all the best spots in Nairobi and has the eye of a true artist. Highly recommend."</p>
+        <div class="testimonial-author">James Kiprotich — Outdoor Portrait</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ CONTACT ═══════════════ -->
+<section class="section contact-section" id="contact">
+  <div class="container">
+    <div class="contact-grid">
+      <div class="contact-info">
+        <p class="section-label reveal">Get in Touch</p>
+        <h2 class="section-title reveal">Let's Create<br><em>Together</em></h2>
+        <p class="section-body reveal" style="margin-top:1.5rem;margin-bottom:3rem;">
+          Ready to capture your story? Reach out and let's discuss your vision. Whether it's an intimate portrait or a grand wedding, we're here for it.
+        </p>
+        <div class="contact-detail reveal">
+          <div class="contact-detail-icon"><i class="fas fa-phone"></i></div>
+          <div class="contact-detail-text">
+            <span class="label">Phone / WhatsApp</span>
+            <span class="value">{{ settings.phone }}</span>
+          </div>
+        </div>
+        <div class="contact-detail reveal">
+          <div class="contact-detail-icon"><i class="fas fa-envelope"></i></div>
+          <div class="contact-detail-text">
+            <span class="label">Email</span>
+            <span class="value">{{ settings.email }}</span>
+          </div>
+        </div>
+        <div class="contact-detail reveal">
+          <div class="contact-detail-icon"><i class="fas fa-map-marker-alt"></i></div>
+          <div class="contact-detail-text">
+            <span class="label">Location</span>
+            <span class="value">{{ settings.location }}</span>
+          </div>
+        </div>
+        <div class="contact-socials reveal">
+          <a href="{{ settings.instagram }}" class="social-btn" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="{{ settings.tiktok }}" class="social-btn" target="_blank" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+          <a href="{{ settings.youtube }}" class="social-btn" target="_blank" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+          <a href="{{ settings.get('facebook', '#') }}" class="social-btn" target="_blank" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a href="https://wa.me/{{ settings.whatsapp }}" class="social-btn" target="_blank" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+        </div>
+      </div>
+
+      <div>
+        <form class="contact-form reveal" id="contactForm">
+          <div class="form-row">
+            <div class="form-field">
+              <label>Your Name *</label>
+              <input type="text" name="name" required placeholder="e.g. Jane Doe">
+            </div>
+            <div class="form-field">
+              <label>Email Address *</label>
+              <input type="email" name="email" required placeholder="you@example.com">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-field">
+              <label>Phone Number</label>
+              <input type="tel" name="phone" placeholder="+254 700 000 000">
+            </div>
+            <div class="form-field">
+              <label>Service *</label>
+              <select name="service" required>
+                <option value="">Select a service...</option>
+                <option>Studio Portrait</option>
+                <option>Outdoor Portrait</option>
+                <option>Engagement Shoot</option>
+                <option>Wedding Coverage</option>
+                <option>Pre-Wedding Shoot</option>
+                <option>Corporate Event</option>
+                <option>Team Building</option>
+                <option>Videography</option>
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-field">
+            <label>Tell us about your vision *</label>
+            <textarea name="message" required placeholder="Describe your project, preferred dates, location ideas..."></textarea>
+          </div>
+          <button type="submit" class="form-submit"><span>Send Message</span></button>
+          <div id="formMsg" style="display:none;font-family:var(--font-body);font-size:1rem;color:var(--gold);margin-top:1rem;padding:0.8rem;border:1px solid rgba(201,169,110,0.2);"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Portfolio tab filter
+const tabs = document.querySelectorAll('.portfolio-tab');
+const galleryItems = document.querySelectorAll('#homeGallery .gallery-item');
+
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    tabs.forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    const cat = tab.dataset.cat;
+    galleryItems.forEach(item => {
+      item.style.display = (cat === 'all' || item.dataset.cat === cat) ? 'block' : 'none';
+    });
+  });
+});
+
+// Contact form AJAX
+document.getElementById('contactForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const btn = e.target.querySelector('.form-submit');
+  btn.querySelector('span').textContent = 'Sending...';
+  btn.disabled = true;
+  const data = Object.fromEntries(new FormData(e.target));
+  try {
+    const res = await fetch('/contact', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(data)
+    });
+    const json = await res.json();
+    const msg = document.getElementById('formMsg');
+    msg.style.display = 'block';
+    msg.textContent = json.message;
+    e.target.reset();
+  } catch(err) {
+    const msg = document.getElementById('formMsg');
+    msg.style.display = 'block';
+    msg.textContent = 'Something went wrong. Please try again.';
+  }
+  btn.querySelector('span').textContent = 'Send Message';
+  btn.disabled = false;
+});
+</script>
+{% endblock %}
